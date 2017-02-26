@@ -1,0 +1,92 @@
+一、认识Glide
+1、添加依赖
+compile 'com.android.support:support-v4:25.1.1'
+compile 'com.github.bumptech.glide:glide:3.7.0'
+2、混淆配置（参照说明）
+
+---------------------------------3.0新特性
+1、支持GIF解码
+和其他图片加载方式一样 Glide.with(...).load(...)
+Glide.with(context).load(...).asBitmap() 将加载一张静态图片
+Glide.with(context).load(...).asGif() 作为gif动图进行加载，如果不是gif图片，则会回调error()
+2、Local video stills 本地视频照片
+Glide.with(...).load(...)
+3、Thumbnail support  缩略图
+现在可以减少用户等待的时间，让用户尽早看到图片，先显示一个缩略图，然后再加载大图，相当于使用了另外一张placeholder
+Glide.with(context).load(yourUrl).thumbnail(0.1f).into(yourView)
+也可以使用其他网络图片作为缩略图：
+DrawableTypeRequest<String> thumbanilImg = Glide.with(this)
+            .load(imgUrls[1]);
+Glide.with(this)
+        .load(imgUrls[2])
+        .thumbnail(thumbanilImg) //使用其他网络图片作为缩略图
+        .into(imageView);
+4、绑定生命周期
+Activity或Fragment的onStop方法中自动暂停所有的请求，然后onStart方法中重新开始。
+Animated GIFs 也会在onStop中自动暂停，避免在后台浪费电量。
+当网络链接状态发生改变时，比如从无网络状态->网络连接状态，所有失败的请求会自动重新开始。
+
+5、Transcoding 转码
+Glide.with(this)
+        .load("/user/profile/photo/path")
+        .asBitmap()
+        .toBytes() //转换为bytes[]
+        .centerCrop()
+        .into(new SimpleTarget<byte[]>(250, 250) {
+            @Override
+            public void onResourceReady(byte[] data, GlideAnimation anim) {
+                // Post your bytes to a background thread and upload them here.
+            }
+        });
+
+5、Animations 动画
+支持 .crossFade()渐显动画、.animate()属性动画
+6、OkHttp and Volley Support
+Glide默认使用HttpUrlConnection，你也可以指定Volley或Okhttp、Okhttp3
+参照：https://github.com/bumptech/glide/wiki/Integration-Libraries
+以Okhttp3为列：
+1）添加依赖
+dependencies {
+    compile 'com.github.bumptech.glide:okhttp3-integration:1.4.0@aar'
+    //compile 'com.squareup.okhttp3:okhttp:3.2.0'
+}
+2）在Manifest.xml中配置
+<meta-data
+    android:name="com.bumptech.glide.integration.okhttp3.OkHttpGlideModule"
+    android:value="GlideModule" />
+name 是自定义的GlideModule
+value 固定是GlideModule
+3）混淆配置
+-keep class com.bumptech.glide.integration.okhttp3.OkHttpGlideModule
+
+Volley配置
+https://github.com/bumptech/glide/wiki/Integration-Libraries
+
+
+6、其他
+placeHolder支持drawable、请求支持优先级、调整图片大小.override(width, height)、指定本地缓存策列diskCacheStrategy
+
+
+
+---------------------------一些使用技巧
+1.Glide.with(context).resumeRequests()和 Glide.with(context).pauseRequests()
+当列表在滑动的时候，调用pauseRequests()取消请求，滑动停止时，调用resumeRequests()恢复请求。这样是不是会好些呢？
+2.Glide.clear()
+当你想清除掉所有的图片加载请求时，这个方法可以帮助到你。
+3.ListPreloader
+如果你想让列表预加载的话，不妨试一下ListPreloader这个类。
+
+--------------------------------开源库支持
+图片转换
+比如圆形、方形、圆角、颜色、高斯模糊等效果
+https://github.com/wasabeef/glide-transformations
+
+
+
+
+
+
+
+
+
+
