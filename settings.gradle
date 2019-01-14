@@ -1,1 +1,2 @@
-include ':app', ':library_37'
+include  ':demo'
+//include ':library_37'
