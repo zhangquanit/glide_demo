@@ -1,10 +1,19 @@
 package com.glide.demo;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.BitmapShader;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.RectF;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.annotation.DrawableRes;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -12,6 +21,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.request.FutureTarget;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
@@ -20,12 +30,13 @@ import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
 import com.glide.demo.transform.BlurTransformation;
 import com.glide.demo.transform.RadiusTransformation;
+import com.glide.demo.util.Utils;
 
 import java.io.File;
 
 public class MainActivity extends AppCompatActivity {
     private ImageView line1_iv1, line1_iv2, line1_iv3, line1_iv4;
-    private ImageView line2_iv1, line2_iv2, line2_iv3;
+    private ImageView line2_iv1, line2_iv2, line2_iv3,line2_iv4;
     private ImageView line3_iv1, line3_iv2, line3_iv3;
     private ImageView line4_iv1, line4_iv2, line4_iv3;
     private ImageView line5_iv1, line5_iv2, line5_iv3;
@@ -45,6 +56,7 @@ public class MainActivity extends AppCompatActivity {
         line2_iv1 = findViewById(R.id.line2_iv1);
         line2_iv2 = findViewById(R.id.line2_iv2);
         line2_iv3 = findViewById(R.id.line2_iv3);
+        line2_iv4 = findViewById(R.id.line2_iv4);
 
         line3_iv1 = findViewById(R.id.line3_iv1);
         line3_iv2 = findViewById(R.id.line3_iv2);
@@ -62,12 +74,32 @@ public class MainActivity extends AppCompatActivity {
         line6_iv2 = findViewById(R.id.line6_iv2);
         line6_iv3 = findViewById(R.id.line6_iv3);
 
-        line1Test();
-        line2Test();
-        line3Test();
-        line4Test();
-        line5Test();
-        line6Test();
+
+        findViewById(R.id.btn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                line1Test();
+                line2Test();
+                line3Test();
+                line4Test();
+                line5Test();
+                line6Test();
+            }
+        });
+//        line1Test();
+//        line2Test();
+//        line3Test();
+//        line4Test();
+//        line5Test();
+//        line6Test();
+
+
+
+        //圆角图片
+        Drawable radiusDrawable = getRadiusDrawable(this, R.mipmap.quan, 4);
+        ImageView imageView = findViewById(R.id.imageview2);
+        imageView.setImageDrawable(radiusDrawable);
+
     }
 
     private void line1Test() {
@@ -148,6 +180,30 @@ public class MainActivity extends AppCompatActivity {
                 .error(R.mipmap.ic_launcher)
                 .transform(new BlurTransformation(this, 20))
                 .into(line2_iv3);
+
+
+        //测试请求失败，占位图片是否圆角, 结论占位图片是不会转换为圆角的
+        GlideApp
+                .with(this)
+                .load("http://www.baidu.com/sxx")
+                .centerCrop()
+                .placeholder(R.mipmap.timg)
+                .error(R.mipmap.timg)
+                .transform(new RadiusTransformation(this, 10))
+                .addListener(new RequestListener<Drawable>() {
+                    @Override
+                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                        System.out.println("onLoadFailed "+e);
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                       System.out.println("onResourceReady");
+                        return false;
+                    }
+                })
+                .into(line2_iv4);
     }
 
     /**
@@ -332,6 +388,22 @@ public class MainActivity extends AppCompatActivity {
                     }
                 })
                 .into(line6_iv3);
+    }
+
+
+    private static Drawable getRadiusDrawable(Context ctx, @DrawableRes int imgRes, int radius) {
+        radius = Utils.dp2px(ctx, radius);
+        Bitmap toTransform = BitmapFactory.decodeResource(ctx.getResources(), imgRes);
+        int width = toTransform.getWidth();
+        int height = toTransform.getHeight();
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        bitmap.setHasAlpha(true);
+        Canvas canvas = new Canvas(bitmap);
+        Paint paint = new Paint();
+        paint.setAntiAlias(true);
+        paint.setShader(new BitmapShader(toTransform, BitmapShader.TileMode.CLAMP, BitmapShader.TileMode.CLAMP));
+        canvas.drawRoundRect(new RectF(0, 0, width, height), radius, radius, paint);
+        return new BitmapDrawable(ctx.getResources(), bitmap);
     }
 
 
