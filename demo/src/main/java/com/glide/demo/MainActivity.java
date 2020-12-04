@@ -10,18 +10,18 @@ import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.support.annotation.DrawableRes;
-import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
+
+import androidx.annotation.DrawableRes;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.GlideException;
-import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.request.FutureTarget;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
@@ -36,13 +36,25 @@ import java.io.File;
 
 public class MainActivity extends AppCompatActivity {
     private ImageView line1_iv1, line1_iv2, line1_iv3, line1_iv4;
-    private ImageView line2_iv1, line2_iv2, line2_iv3,line2_iv4;
+    private ImageView line2_iv1, line2_iv2, line2_iv3, line2_iv4;
     private ImageView line3_iv1, line3_iv2, line3_iv3;
     private ImageView line4_iv1, line4_iv2, line4_iv3;
     private ImageView line5_iv1, line5_iv2, line5_iv3;
     private ImageView line6_iv1, line6_iv2, line6_iv3;
 
-    private String URL1 = "http://pic1.nipic.com/2008-12-30/200812308231244_2.jpg";
+    private int pic_holder = R.mipmap.icon_holder;
+    private int pic_error = R.mipmap.icon_fail;
+    private int pic_webp = R.mipmap.icon_vip;
+    private String pic_webp_remote="https://img.alicdn.com/bao/uploaded/i2/2206822446415/O1CN01c1QbpM1xG7N0Zubm8_!!2206822446415.jpg_240x240_.webp";
+    private String pic_webp_animate = "http://resources.xinletao.vip/p/files/file/20200728/cdd8b1e2addb3a4367620e3f364b9dab.webp";
+    private String pic = "http://pic1.nipic.com/2008-12-30/200812308231244_2.jpg";
+
+    //https图片
+    private String pic_https = "https://cbu01.alicdn.com/img/ibank/2018/488/827/9246728884_618839404.220x220.jpg?_=2020";
+
+    //gif动图  圆角测试
+    private String pic_gif = "http://guolin.tech/test.gif";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,16 +98,13 @@ public class MainActivity extends AppCompatActivity {
                 line6Test();
             }
         });
-//        line1Test();
-//        line2Test();
-//        line3Test();
-//        line4Test();
-//        line5Test();
-//        line6Test();
 
 
 
-        //圆角图片
+        //https测试  必须OkHttpGlideModule重写支持
+        Glide.with(this).load(pic_https).override(200,200).into((ImageView) findViewById(R.id.imageview1));
+
+        //自定义圆角图片
         Drawable radiusDrawable = getRadiusDrawable(this, R.mipmap.quan, 4);
         ImageView imageView = findViewById(R.id.imageview2);
         imageView.setImageDrawable(radiusDrawable);
@@ -103,11 +112,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void line1Test() {
-        GlideApp.with(this).load(URL1).into(line1_iv1);
-        GlideApp.with(this).load(URL1).fitCenter().into(line1_iv2);
-        GlideApp
+        Glide.with(this).load(pic).into(line1_iv1);
+        Glide.with(this).load(pic).fitCenter().into(line1_iv2);
+        Glide
                 .with(this)
-                .load(URL1)
+                .load(pic)
                 .centerCrop()
                 .placeholder(R.mipmap.ic_launcher)
                 .error(R.mipmap.ic_launcher)
@@ -118,9 +127,9 @@ public class MainActivity extends AppCompatActivity {
         requestOptions.placeholder(R.mipmap.ic_launcher)
                 .centerCrop()
                 .error(R.mipmap.ic_launcher);
-        GlideApp
+        Glide
                 .with(this)
-                .load(URL1)
+                .load(pic)
                 .apply(requestOptions)
                 .into(line1_iv3);
     }
@@ -152,9 +161,9 @@ public class MainActivity extends AppCompatActivity {
     private void line2Test() {
 
         //圆角
-        GlideApp
+        Glide
                 .with(this)
-                .load(URL1)
+                .load(pic)
                 .centerCrop()
                 .placeholder(R.mipmap.ic_launcher)
                 .error(R.mipmap.ic_launcher)
@@ -162,9 +171,9 @@ public class MainActivity extends AppCompatActivity {
                 .into(line2_iv1);
 
         //圆形
-        GlideApp
+        Glide
                 .with(this)
-                .load(URL1)
+                .load(pic)
                 .placeholder(R.mipmap.ic_launcher)
                 .error(R.mipmap.ic_launcher)
 //                .transform(new CircleTransformation()) //自定义
@@ -172,9 +181,9 @@ public class MainActivity extends AppCompatActivity {
                 .into(line2_iv2);
 
         //高斯模糊
-        GlideApp
+        Glide
                 .with(this)
-                .load(URL1)
+                .load(pic)
                 .centerCrop()
                 .placeholder(R.mipmap.ic_launcher)
                 .error(R.mipmap.ic_launcher)
@@ -183,7 +192,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         //测试请求失败，占位图片是否圆角, 结论占位图片是不会转换为圆角的
-        GlideApp
+        Glide
                 .with(this)
                 .load("http://www.baidu.com/sxx")
                 .centerCrop()
@@ -193,13 +202,13 @@ public class MainActivity extends AppCompatActivity {
                 .addListener(new RequestListener<Drawable>() {
                     @Override
                     public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-                        System.out.println("onLoadFailed "+e);
+                        System.out.println("onLoadFailed " + e);
                         return false;
                     }
 
                     @Override
                     public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-                       System.out.println("onResourceReady");
+                        System.out.println("onResourceReady");
                         return false;
                     }
                 })
@@ -229,7 +238,7 @@ public class MainActivity extends AppCompatActivity {
                 .centerCrop()
                 .diskCacheStrategy(DiskCacheStrategy.NONE); //不使用硬盘缓存
         Glide.with(this)
-                .load(URL1)
+                .load(pic)
                 .apply(options)
                 .into(line3_iv1);
 
@@ -241,7 +250,7 @@ public class MainActivity extends AppCompatActivity {
                 .skipMemoryCache(true) //不适用内存缓存
                 .diskCacheStrategy(DiskCacheStrategy.NONE); //不使用硬盘缓存
         Glide.with(this)
-                .load(URL1)
+                .load(pic)
                 .apply(options)
                 .into(line3_iv2);
 
@@ -261,7 +270,7 @@ public class MainActivity extends AppCompatActivity {
                 .override(50, 50) //固定大小，也就是说，Glide现在只会将图片加载成50*50像素的尺寸，而不会管你的ImageView的大小是多少了。
                 .diskCacheStrategy(DiskCacheStrategy.NONE); //不使用缓存
         Glide.with(this)
-                .load(URL1)
+                .load(pic)
                 .apply(options)
                 .into(line4_iv1);
 
@@ -272,7 +281,7 @@ public class MainActivity extends AppCompatActivity {
                 .override(Target.SIZE_ORIGINAL) //加载一张图片的原始尺寸，这样的话，Glide就不会再去自动压缩图片，而是会去加载图片的原始尺寸。当然，这种写法也会面临着更高的OOM风险。
                 .diskCacheStrategy(DiskCacheStrategy.NONE); //不使用缓存
         Glide.with(this)
-                .load(URL1)
+                .load(pic)
                 .apply(options)
                 .into(line4_iv2);
     }
